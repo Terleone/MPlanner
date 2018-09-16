@@ -22,12 +22,18 @@ namespace MPlanner.Controllers
         // GET: Movies
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Movie.ToListAsync());
+            if (!User.Identity.IsAuthenticated)
+                return NotFound();
+
+            return View(await _context.Movie.Where(x => x.UserName == User.Identity.Name).ToListAsync());
         }
 
         // GET: Movies/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            if (!User.Identity.IsAuthenticated)
+                return NotFound();
+
             if (id == null)
             {
                 return NotFound();
@@ -46,6 +52,9 @@ namespace MPlanner.Controllers
         // GET: Movies/Create
         public IActionResult Create()
         {
+            if (!User.Identity.IsAuthenticated)
+                return NotFound();
+
             return View();
         }
 
@@ -58,6 +67,7 @@ namespace MPlanner.Controllers
         {
             if (ModelState.IsValid)
             {
+                movie.UserName = User.Identity.Name;
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -68,6 +78,9 @@ namespace MPlanner.Controllers
         // GET: Movies/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            if (!User.Identity.IsAuthenticated)
+                return NotFound();
+
             if (id == null)
             {
                 return NotFound();
@@ -119,6 +132,9 @@ namespace MPlanner.Controllers
         // GET: Movies/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (!User.Identity.IsAuthenticated)
+                return NotFound();
+
             if (id == null)
             {
                 return NotFound();
