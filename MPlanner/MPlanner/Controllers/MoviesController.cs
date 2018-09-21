@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using MPlanner.Models;
 
 namespace MPlanner.Controllers
 {
+    [Authorize]
     public class MoviesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,18 +24,12 @@ namespace MPlanner.Controllers
         // GET: Movies
         public async Task<IActionResult> Index()
         {
-            if (!User.Identity.IsAuthenticated)
-                return NotFound();
-
             return View(await _context.Movie.Where(x => x.UserName == User.Identity.Name).ToListAsync());
         }
 
         // GET: Movies/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (!User.Identity.IsAuthenticated)
-                return NotFound();
-
             if (id == null)
             {
                 return NotFound();
@@ -52,9 +48,6 @@ namespace MPlanner.Controllers
         // GET: Movies/Create
         public IActionResult Create()
         {
-            if (!User.Identity.IsAuthenticated)
-                return NotFound();
-
             return View();
         }
 
@@ -78,9 +71,6 @@ namespace MPlanner.Controllers
         // GET: Movies/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (!User.Identity.IsAuthenticated)
-                return NotFound();
-
             if (id == null)
             {
                 return NotFound();
@@ -132,9 +122,6 @@ namespace MPlanner.Controllers
         // GET: Movies/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (!User.Identity.IsAuthenticated)
-                return NotFound();
-
             if (id == null)
             {
                 return NotFound();
