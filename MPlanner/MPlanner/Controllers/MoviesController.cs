@@ -152,5 +152,27 @@ namespace MPlanner.Controllers
         {
             return _context.Movie.Any(e => e.MovieId == id);
         }
+
+        public IActionResult Find()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Find([Bind("Genre,MinTime,MaxTime,Director")] SearchData searchData)
+        {
+            List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name
+                && (searchData.Genre != null ? x.Genre == searchData.Genre : true)
+                && (searchData.MinTime != null ? x.Time >= searchData.MinTime : true)
+                && (searchData.MaxTime != null ? x.Time <= searchData.MaxTime : true)
+                && (searchData.Director != null ? x.Director == searchData.Director : true)).ToListAsync();
+
+            if (movies.Count == 0)
+                return View("MovieNotFound");
+
+            Movie result = movies.OrderBy(x => x.MovieId).ElementAt(0);
+            return View("MovieFound", result);
+        }
     }
 }
