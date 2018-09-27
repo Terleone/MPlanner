@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Ical.Net;
+using Ical.Net.CalendarComponents;
+using Ical.Net.DataTypes;
+using Ical.Net.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -186,8 +190,60 @@ namespace MPlanner.Controllers
             "WednesdayStartTime,WednesdayEndTime,ThurdsayStartTime,ThursdayEndTime,FridayStartTime,FridayEndTime," +
             "SaturdayStartTime,SaturdayEndTime,SundayStartTime,SundayEndTime")] ExportData exportData)
         {
-            List<Movie> movies = await _context.Movie.OrderBy(x => x.MovieId).ToListAsync();
-            return View();
+            List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name)
+                .OrderBy(x => x.MovieId).ToListAsync();
+
+            Dictionary<DayOfWeek, (DateTime? startTime, DateTime? endTime, int amount)> availability = new Dictionary<DayOfWeek, (DateTime?, DateTime?, int)>()
+            {
+                { DayOfWeek.Monday, (exportData.MondayStartTime, exportData.MondayEndTime, exportData.MondayAmount) },
+                { DayOfWeek.Tuesday, (exportData.TuesdayStartTime, exportData.TuesdayEndTime, exportData.TuesdayAmount) },
+                { DayOfWeek.Wednesday, (exportData.WednesdayStartTime, exportData.WednesdayEndTime, exportData.WednesdayAmount) },
+                { DayOfWeek.Thursday, (exportData.ThursdayStartTime, exportData.ThursdayEndTime, exportData.ThursdayAmount) },
+                { DayOfWeek.Friday, (exportData.FridayStartTime, exportData.FridayEndTime, exportData.FridayAmount) },
+                { DayOfWeek.Saturday, (exportData.SaturdayStartTime, exportData.SaturdayEndTime, exportData.SaturdayAmount) },
+                { DayOfWeek.Sunday, (exportData.SundayStartTime, exportData.SundayEndTime, exportData.SundayAmount) }
+            };
+
+            List<Movie> notMappedMovies = new List<Movie>();
+            Calendar calendar = new Calendar();
+
+            DateTime iterator = DateTime.Now;
+            DateTime? lastMapping = null;
+            foreach (Movie movie in movies)
+            {
+                CalendarEvent calEvent = null;
+                for (int i = 1; i < 8; i++)
+                {
+                    iterator = iterator.AddDays(i);
+                    var dayInfo = availability[iterator.DayOfWeek];
+                    if (dayInfo.amount >= movie.Time)
+                    {
+                        DateTime startTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, dayInfo.startTime.Value.Hour,
+                            dayInfo.startTime.Value.Minute, 0);
+                        DateTime endTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, dayInfo.endTime.Value.Hour,
+                            dayInfo.endTime.Value.Minute, 0);
+
+                        calEvent = new CalendarEvent
+                        {
+                            Start = new CalDateTime(startTime),
+                            End = new CalDateTime(endTime)//,
+                            //Name = movie.Title
+                        };
+
+                        calendar.Events.Add(calEvent);
+                    }
+
+                    if (calEvent == null)
+                    {
+                        iterator = lastMapping ?? DateTime.Now;
+                        notMappedMovies.Add(movie);
+                    }
+                }
+            }
+
+            var serializer = new CalendarSerializer();
+            var serializedCalendar = serializer.SerializeToString(calendar);
+            return File(System.Text.Encoding.ASCII.GetBytes(serializedCalendar), "application/octet-stream", "mplan.ical");
         }
     }
 }

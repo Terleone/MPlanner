@@ -69,20 +69,20 @@ namespace MPlanner.Models
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:H:mm")]
         public DateTime? SundayEndTime { get; set; }
 
-        public bool IsMondayValid { get { return MondayStartTime.HasValue && MondayEndTime.HasValue; } }
-        public bool IsTuesdaValid { get { return TuesdayStartTime.HasValue && TuesdayEndTime.HasValue; } }
-        public bool IsWednesdayValid { get { return WednesdayStartTime.HasValue && WednesdayEndTime.HasValue; } }
-        public bool IsThursdayValid { get { return ThursdayStartTime.HasValue && ThursdayEndTime.HasValue; } }
-        public bool IsFridayValid { get { return FridayStartTime.HasValue && FridayEndTime.HasValue; } }
-        public bool IsSaturdayValid { get { return SaturdayStartTime.HasValue && SaturdayEndTime.HasValue; } }
-        public bool IsSundayValid { get { return SundayStartTime.HasValue && SundayEndTime.HasValue; } }
+        public bool IsMondayValid { get { return MondayStartTime.HasValue && MondayEndTime.HasValue && MondayStartTime.Value < MondayEndTime.Value; } }
+        public bool IsTuesdaValid { get { return TuesdayStartTime.HasValue && TuesdayEndTime.HasValue && TuesdayStartTime.Value < TuesdayEndTime.Value; } }
+        public bool IsWednesdayValid { get { return WednesdayStartTime.HasValue && WednesdayEndTime.HasValue && WednesdayStartTime.Value < WednesdayEndTime.Value; } }
+        public bool IsThursdayValid { get { return ThursdayStartTime.HasValue && ThursdayEndTime.HasValue && ThursdayStartTime.Value < ThursdayEndTime.Value; } }
+        public bool IsFridayValid { get { return FridayStartTime.HasValue && FridayEndTime.HasValue && FridayStartTime.Value < FridayEndTime.Value; } }
+        public bool IsSaturdayValid { get { return SaturdayStartTime.HasValue && SaturdayEndTime.HasValue && SaturdayStartTime.Value < SaturdayEndTime.Value; } }
+        public bool IsSundayValid { get { return SundayStartTime.HasValue && SundayEndTime.HasValue && SundayStartTime.Value < SundayEndTime.Value; } }
 
-        public int MondayAmount { get { return (int)(MondayEndTime.Value.TimeOfDay - MondayStartTime.Value.TimeOfDay).TotalMinutes; } }
-        public int TuesdayAmount { get { return (int)(TuesdayEndTime.Value.TimeOfDay - TuesdayStartTime.Value.TimeOfDay).TotalMinutes; } }
-        public int WednesdayAmount { get { return (int)(WednesdayEndTime.Value.TimeOfDay - WednesdayStartTime.Value.TimeOfDay).TotalMinutes; } }
-        public int ThursdayAmount { get { return (int)(ThursdayEndTime.Value.TimeOfDay - ThursdayStartTime.Value.TimeOfDay).TotalMinutes; } }
-        public int FridayAmount { get { return (int)(FridayEndTime.Value.TimeOfDay - FridayStartTime.Value.TimeOfDay).TotalMinutes; } }
-        public int SaturdayAmount { get { return (int)(SaturdayEndTime.Value.TimeOfDay - SaturdayStartTime.Value.TimeOfDay).TotalMinutes; } }
-        public int SundayAmount { get { return (int)(SundayEndTime.Value.TimeOfDay - SundayStartTime.Value.TimeOfDay).TotalMinutes; } }
+        public int MondayAmount { get { return IsMondayValid ? (int)(MondayEndTime.Value.TimeOfDay - MondayStartTime.Value.TimeOfDay).TotalMinutes : 0; } }
+        public int TuesdayAmount { get { return IsTuesdaValid ? (int)(TuesdayEndTime.Value.TimeOfDay - TuesdayStartTime.Value.TimeOfDay).TotalMinutes : 0; } }
+        public int WednesdayAmount { get { return IsWednesdayValid ? (int)(WednesdayEndTime.Value.TimeOfDay - WednesdayStartTime.Value.TimeOfDay).TotalMinutes : 0; } }
+        public int ThursdayAmount { get { return IsThursdayValid ? (int)(ThursdayEndTime.Value.TimeOfDay - ThursdayStartTime.Value.TimeOfDay).TotalMinutes : 0; } }
+        public int FridayAmount { get { return IsFridayValid ? (int)(FridayEndTime.Value.TimeOfDay - FridayStartTime.Value.TimeOfDay).TotalMinutes : 0; } }
+        public int SaturdayAmount { get { return IsSaturdayValid ? (int)(SaturdayEndTime.Value.TimeOfDay - SaturdayStartTime.Value.TimeOfDay).TotalMinutes : 0; } }
+        public int SundayAmount { get { return IsSundayValid ? (int)(SundayEndTime.Value.TimeOfDay - SundayStartTime.Value.TimeOfDay).TotalMinutes : 0; } }
     }
 }
