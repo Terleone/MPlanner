@@ -1,0 +1,128 @@
+﻿@model MPlanner.Models.ExportData
+
+@{
+    ViewData["Title"] = "Export";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Export</h2>
+<h4>Plan of sessions</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Export">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="MondayStartTime" class="control-label"></label>
+                        <input asp-for="MondayStartTime" class="form-control" />
+                        <span asp-validation-for="MondayStartTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="MondayEndTime" class="control-label"></label>
+                    <input asp-for="MondayEndTime" class="form-control" />
+                    <span asp-validation-for="MondayEndTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="TuesdayStartTime" class="control-label"></label>
+                        <input asp-for="TuesdayStartTime" class="form-control" />
+                        <span asp-validation-for="TuesdayStartTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="TuesdayEndTime" class="control-label"></label>
+                    <input asp-for="TuesdayEndTime" class="form-control" />
+                    <span asp-validation-for="TuesdayEndTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WednesdayStartTime" class="control-label"></label>
+                        <input asp-for="WednesdayStartTime" class="form-control" />
+                        <span asp-validation-for="WednesdayStartTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="WednesdayEndTime" class="control-label"></label>
+                    <input asp-for="WednesdayEndTime" class="form-control" />
+                    <span asp-validation-for="WednesdayEndTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="ThursdayStartTime" class="control-label"></label>
+                        <input asp-for="ThursdayStartTime" class="form-control" />
+                        <span asp-validation-for="ThursdayStartTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ThursdayEndTime" class="control-label"></label>
+                    <input asp-for="ThursdayEndTime" class="form-control" />
+                    <span asp-validation-for="ThursdayEndTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="FridayStartTime" class="control-label"></label>
+                        <input asp-for="FridayStartTime" class="form-control" />
+                        <span asp-validation-for="FridayStartTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="FridayEndTime" class="control-label"></label>
+                    <input asp-for="FridayEndTime" class="form-control" />
+                    <span asp-validation-for="FridayEndTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SaturdayStartTime" class="control-label"></label>
+                        <input asp-for="SaturdayStartTime" class="form-control" />
+                        <span asp-validation-for="SaturdayStartTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SaturdayEndTime" class="control-label"></label>
+                    <input asp-for="SaturdayEndTime" class="form-control" />
+                    <span asp-validation-for="SaturdayEndTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SundayStartTime" class="control-label"></label>
+                        <input asp-for="SundayStartTime" class="form-control" />
+                        <span asp-validation-for="SundayStartTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SundayEndTime" class="control-label"></label>
+                    <input asp-for="SundayEndTime" class="form-control" />
+                    <span asp-validation-for="SundayEndTime" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Export" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

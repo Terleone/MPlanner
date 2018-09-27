@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -173,6 +173,21 @@ namespace MPlanner.Controllers
 
             Movie result = movies.OrderBy(x => x.MovieId).ElementAt(0);
             return View("MovieFound", result);
+        }
+
+        public IActionResult Export()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Export([Bind("MondayStartTime,MondayEndTime,TuesdayStartTime,TuesdayEndTime," +
+            "WednesdayStartTime,WednesdayEndTime,ThurdsayStartTime,ThursdayEndTime,FridayStartTime,FridayEndTime," +
+            "SaturdayStartTime,SaturdayEndTime,SundayStartTime,SundayEndTime")] ExportData exportData)
+        {
+            List<Movie> movies = await _context.Movie.OrderBy(x => x.MovieId).ToListAsync();
+            return View();
         }
     }
 }
