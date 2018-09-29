@@ -187,7 +187,7 @@ namespace MPlanner.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Export([Bind("MondayStartTime,MondayEndTime,TuesdayStartTime,TuesdayEndTime," +
-            "WednesdayStartTime,WednesdayEndTime,ThurdsayStartTime,ThursdayEndTime,FridayStartTime,FridayEndTime," +
+            "WednesdayStartTime,WednesdayEndTime,ThursdayStartTime,ThursdayEndTime,FridayStartTime,FridayEndTime," +
             "SaturdayStartTime,SaturdayEndTime,SundayStartTime,SundayEndTime")] ExportData exportData)
         {
             List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name)
@@ -214,7 +214,7 @@ namespace MPlanner.Controllers
                 CalendarEvent calEvent = null;
                 for (int i = 1; i < 8; i++)
                 {
-                    iterator = iterator.AddDays(i);
+                    iterator = iterator.AddDays(1);
                     var dayInfo = availability[iterator.DayOfWeek];
                     if (dayInfo.amount >= movie.Time)
                     {
@@ -226,18 +226,21 @@ namespace MPlanner.Controllers
                         calEvent = new CalendarEvent
                         {
                             Start = new CalDateTime(startTime),
-                            End = new CalDateTime(endTime)//,
-                            //Name = movie.Title
+                            End = new CalDateTime(endTime),
+                            Description = "Seance generated with MPlanner",
+                            Summary = movie.Title
                         };
 
                         calendar.Events.Add(calEvent);
+                        lastMapping = iterator;
+                        break;
                     }
+                }
 
-                    if (calEvent == null)
-                    {
-                        iterator = lastMapping ?? DateTime.Now;
-                        notMappedMovies.Add(movie);
-                    }
+                if (calEvent == null)
+                {
+                    iterator = lastMapping ?? DateTime.Now;
+                    notMappedMovies.Add(movie);
                 }
             }
 
