@@ -204,43 +204,36 @@ namespace MPlanner.Controllers
                 { DayOfWeek.Sunday, (exportData.SundayStartTime, exportData.SundayEndTime, exportData.SundayAmount) }
             };
 
-            List<Movie> notMappedMovies = new List<Movie>();
+            List<Movie> notMappedMovies = movies.Where(m => !availability.Any(day => day.Value.amount >= m.Time)).ToList();
+            movies = movies.Except(notMappedMovies).ToList();
+
             Calendar calendar = new Calendar();
-
-            DateTime iterator = DateTime.Now;
-            DateTime? lastMapping = null;
-            foreach (Movie movie in movies)
+            int index = 0;
+            Movie movie = movies[index];
+            for (DateTime iterator = DateTime.Now.AddDays(1); index < movies.Count; iterator = iterator.AddDays(1))
             {
-                CalendarEvent calEvent = null;
-                for (int i = 1; i < 8; i++)
+                var (availableStart, availableEnd, availableAmount) = availability[iterator.DayOfWeek];
+                while (availableAmount >= movie.Time.Value)
                 {
-                    iterator = iterator.AddDays(1);
-                    var dayInfo = availability[iterator.DayOfWeek];
-                    if (dayInfo.amount >= movie.Time)
+                    DateTime startTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, availableStart.Value.Hour,
+                        availableStart.Value.Minute, 0);
+                    DateTime endTime = startTime.AddMinutes(movie.Time.Value);
+                    availableAmount -= movie.Time.Value;
+                    availableStart = endTime;
+
+                    CalendarEvent calEvent = new CalendarEvent
                     {
-                        DateTime startTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, dayInfo.startTime.Value.Hour,
-                            dayInfo.startTime.Value.Minute, 0);
-                        DateTime endTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, dayInfo.endTime.Value.Hour,
-                            dayInfo.endTime.Value.Minute, 0);
+                        Start = new CalDateTime(startTime),
+                        End = new CalDateTime(endTime),
+                        Description = "Seance generated with MPlanner",
+                        Summary = movie.Title
+                    };
 
-                        calEvent = new CalendarEvent
-                        {
-                            Start = new CalDateTime(startTime),
-                            End = new CalDateTime(endTime),
-                            Description = "Seance generated with MPlanner",
-                            Summary = movie.Title
-                        };
-
-                        calendar.Events.Add(calEvent);
-                        lastMapping = iterator;
+                    calendar.Events.Add(calEvent);
+                    index++;
+                    if (index >= movies.Count)
                         break;
-                    }
-                }
-
-                if (calEvent == null)
-                {
-                    iterator = lastMapping ?? DateTime.Now;
-                    notMappedMovies.Add(movie);
+                    movie = movies[index];
                 }
             }
 
