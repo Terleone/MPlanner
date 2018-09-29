@@ -64,7 +64,9 @@
             <td>
                 <a asp-action="Edit" asp-route-id="@item.MovieId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.MovieId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MovieId">Delete</a>
+                <a asp-action="Delete" asp-route-id="@item.MovieId">Delete</a> |
+                <a asp-action="MoveUp" asp-route-id="@item.MovieId">Move up</a> |
+                <a asp-action="MoveDown" asp-route-id="@item.MovieId">Move down</a>
             </td>
         </tr>
 }

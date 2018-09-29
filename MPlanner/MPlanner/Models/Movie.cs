@@ -19,5 +19,7 @@ namespace MPlanner.Models
         public string Actors { get; set; }
         public string Description { get; set; }
         public string UserName { get; set; }
+
+        public int Position { get; set; }
     }
 }

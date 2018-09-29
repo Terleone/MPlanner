@@ -28,7 +28,7 @@ namespace MPlanner.Controllers
         // GET: Movies
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Movie.Where(x => x.UserName == User.Identity.Name).ToListAsync());
+            return View(await _context.Movie.Where(x => x.UserName == User.Identity.Name).OrderBy(x => x.Position).ToListAsync());
         }
 
         // GET: Movies/Details/5
@@ -65,6 +65,7 @@ namespace MPlanner.Controllers
             if (ModelState.IsValid)
             {
                 movie.UserName = User.Identity.Name;
+                movie.Position = _context.Movie.Where(x => x.UserName == User.Identity.Name).Count();
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -175,7 +176,7 @@ namespace MPlanner.Controllers
             if (movies.Count == 0)
                 return View("MovieNotFound");
 
-            Movie result = movies.OrderBy(x => x.MovieId).ElementAt(0);
+            Movie result = movies.OrderBy(x => x.Position).ElementAt(0);
             return View("MovieFound", result);
         }
 
@@ -191,7 +192,7 @@ namespace MPlanner.Controllers
             "SaturdayStartTime,SaturdayEndTime,SundayStartTime,SundayEndTime")] ExportData exportData)
         {
             List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name)
-                .OrderBy(x => x.MovieId).ToListAsync();
+                .OrderBy(x => x.Position).ToListAsync();
 
             Dictionary<DayOfWeek, (DateTime? startTime, DateTime? endTime, int amount)> availability = new Dictionary<DayOfWeek, (DateTime?, DateTime?, int)>()
             {
@@ -240,6 +241,70 @@ namespace MPlanner.Controllers
             var serializer = new CalendarSerializer();
             var serializedCalendar = serializer.SerializeToString(calendar);
             return File(System.Text.Encoding.ASCII.GetBytes(serializedCalendar), "application/octet-stream", "mplan.ical");
+        }
+
+        // GET: Movies/MoveUp/5
+        public async Task<IActionResult> MoveUp(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var movie = await _context.Movie.FindAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+
+            if (movie.Position != 0)
+            {
+                List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name).OrderBy(x => x.Position).ToListAsync();
+                Movie previousMovie = movies[movies.IndexOf(movie) - 1];
+
+                SwapPositions(movie, previousMovie);
+                _context.Update(movie);
+                _context.Update(previousMovie);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Movies/MoveUp/5
+        public async Task<IActionResult> MoveDown(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var movie = await _context.Movie.FindAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name).OrderBy(x => x.Position).ToListAsync();
+            if (movie.Position != movies.Count - 1)
+            {
+                Movie nextMovie = movies[movies.IndexOf(movie) + 1];
+
+                SwapPositions(movie, nextMovie);
+                _context.Update(movie);
+                _context.Update(nextMovie);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private void SwapPositions(Movie m1, Movie m2)
+        {
+            int position = m1.Position;
+            m1.Position = m2.Position;
+            m2.Position = position;
         }
     }
 }
