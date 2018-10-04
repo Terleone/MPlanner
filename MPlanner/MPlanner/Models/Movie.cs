@@ -18,7 +18,7 @@ namespace MPlanner.Models
         public string Year { get; set; }
         public string Actors { get; set; }
         public string Description { get; set; }
-        public string UserName { get; set; }
+        public string UserId { get; set; }
 
         public int Position { get; set; }
     }

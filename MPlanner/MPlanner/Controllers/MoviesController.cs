@@ -7,6 +7,7 @@ using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 using Ical.Net.Serialization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -20,15 +21,19 @@ namespace MPlanner.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public MoviesController(ApplicationDbContext context)
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public MoviesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Movies
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Movie.Where(x => x.UserName == User.Identity.Name).OrderBy(x => x.Position).ToListAsync());
+            var user = GetCurrentUserAsync().Result;
+            return View(await _context.Movie.Where(x => x.UserId == user.Id).OrderBy(x => x.Position).ToListAsync());
         }
 
         // GET: Movies/Details/5
@@ -56,16 +61,15 @@ namespace MPlanner.Controllers
         }
 
         // POST: Movies/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("MovieId,Title,Genre,Time,Director,Year,Actors,Description")] Movie movie)
         {
             if (ModelState.IsValid)
             {
-                movie.UserName = User.Identity.Name;
-                movie.Position = _context.Movie.Where(x => x.UserName == User.Identity.Name).Count();
+                var user = GetCurrentUserAsync().Result;
+                movie.UserId = user.Id;
+                movie.Position = _context.Movie.Where(x => x.UserId == user.Id).Count();
                 _context.Add(movie);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -90,8 +94,6 @@ namespace MPlanner.Controllers
         }
 
         // POST: Movies/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("MovieId,Title,Genre,Time,Director,Year,Actors,Description")] Movie movie)
@@ -167,7 +169,8 @@ namespace MPlanner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Find([Bind("Genre,MinTime,MaxTime,Director")] SearchData searchData)
         {
-            List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name
+            var user = GetCurrentUserAsync().Result;
+            List<Movie> movies = await _context.Movie.Where(x => x.UserId == user.Id
                 && (searchData.Genre != null ? x.Genre == searchData.Genre : true)
                 && (searchData.MinTime != null ? x.Time >= searchData.MinTime : true)
                 && (searchData.MaxTime != null ? x.Time <= searchData.MaxTime : true)
@@ -191,7 +194,8 @@ namespace MPlanner.Controllers
             "WednesdayStartTime,WednesdayEndTime,ThursdayStartTime,ThursdayEndTime,FridayStartTime,FridayEndTime," +
             "SaturdayStartTime,SaturdayEndTime,SundayStartTime,SundayEndTime")] ExportData exportData)
         {
-            List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name)
+            var user = GetCurrentUserAsync().Result;
+            List<Movie> movies = await _context.Movie.Where(x => x.UserId == user.Id)
                 .OrderBy(x => x.Position).ToListAsync();
 
             Dictionary<DayOfWeek, (DateTime? startTime, DateTime? endTime, int amount)> availability = new Dictionary<DayOfWeek, (DateTime?, DateTime?, int)>()
@@ -257,10 +261,10 @@ namespace MPlanner.Controllers
                 return NotFound();
             }
 
-
             if (movie.Position != 0)
             {
-                List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name).OrderBy(x => x.Position).ToListAsync();
+                var user = GetCurrentUserAsync().Result;
+                List<Movie> movies = await _context.Movie.Where(x => x.UserId == user.Id).OrderBy(x => x.Position).ToListAsync();
                 Movie previousMovie = movies[movies.IndexOf(movie) - 1];
 
                 SwapPositions(movie, previousMovie);
@@ -286,7 +290,8 @@ namespace MPlanner.Controllers
                 return NotFound();
             }
 
-            List<Movie> movies = await _context.Movie.Where(x => x.UserName == User.Identity.Name).OrderBy(x => x.Position).ToListAsync();
+            var user = GetCurrentUserAsync().Result;
+            List<Movie> movies = await _context.Movie.Where(x => x.UserId == user.Id).OrderBy(x => x.Position).ToListAsync();
             if (movie.Position != movies.Count - 1)
             {
                 Movie nextMovie = movies[movies.IndexOf(movie) + 1];
@@ -305,6 +310,11 @@ namespace MPlanner.Controllers
             int position = m1.Position;
             m1.Position = m2.Position;
             m2.Position = position;
+        }
+
+        private async Task<IdentityUser> GetCurrentUserAsync()
+        {
+            return await _userManager.GetUserAsync(HttpContext.User);
         }
     }
 }
