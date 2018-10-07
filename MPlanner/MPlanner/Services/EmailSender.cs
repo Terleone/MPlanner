@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
-using MPlanner.Services;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Threading.Tasks;
 
-namespace WebPWrecover.Services
+namespace MPlanner.Services
 {
     public class EmailSender : IEmailSender
     {
