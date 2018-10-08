@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MPlanner.Data;
+using MPlanner.Models;
 
 namespace MPlanner.Controllers
 {
@@ -59,6 +60,9 @@ namespace MPlanner.Controllers
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var user = await _context.Users.FindAsync(id);
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+                await _userManager.RemoveFromRoleAsync(user, "Admin");
+            _context.Movie.RemoveRange(_context.Movie.Where(x => x.UserId == user.Id));
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -86,6 +90,101 @@ namespace MPlanner.Controllers
         public IActionResult Rights()
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GrantRights([Bind("Email")] RightsGrantingModel viewModel)
+        {
+            const string notGranted = "Admin rights were not granted";
+            const string granted = "Admin rights were granted";
+            const string alreadyAnAdmin = "User is already an admin";
+            const string doesntExist = "User with given e-mail address does not exist.";
+            const string cantYourself = "You're already an admin.";
+
+            if (ModelState.IsValid)
+            {
+                var user = _userManager.FindByEmailAsync(viewModel.Email).Result;
+                var currentUser = GetCurrentUserAsync();
+
+                if (user.Id == currentUser.Result.Id)
+                {
+                    ViewData["Effect"] = notGranted;
+                    ViewData["Reason"] = cantYourself;
+                }
+                else if (user != null)
+                {
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        ViewData["Effect"] = notGranted;
+                        ViewData["Reason"] = alreadyAnAdmin;
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, "Admin");
+                        await _context.SaveChangesAsync();
+
+                        ViewData["Effect"] = granted;
+                    }
+                }
+                else
+                {
+                    ViewData["Effect"] = notGranted;
+                    ViewData["Reason"] = doesntExist;
+                }
+
+                return View("RightsChangingEffect");
+            }
+
+            return View("Rights");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RetractRights([Bind("Email")] RightsGrantingModel viewModel)
+        {
+            const string notRetracted = "Admin rights were not retracted";
+            const string retracted = "Admin right were retracted";
+            const string notAnAdmin = "User is not an admin.";
+            const string doesntExist = "User with given e-mail address does not exist.";
+            const string cantYourself = "You cannot retract your own rights.";
+
+            if (ModelState.IsValid)
+            {
+                var user = _userManager.FindByEmailAsync(viewModel.Email).Result;
+                var currentUser = GetCurrentUserAsync();
+
+                if (user.Id == currentUser.Result.Id)
+                {
+                    ViewData["Effect"] = notRetracted;
+                    ViewData["Reason"] = cantYourself;
+                }
+                else if (user != null)
+                {
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        await _userManager.RemoveFromRoleAsync(user, "Admin");
+                        await _context.SaveChangesAsync();
+
+                        ViewData["Effect"] = retracted;
+                    }
+                    else
+                    {
+                        ViewData["Effect"] = notRetracted;
+                        ViewData["Reason"] = notAnAdmin;
+                    }
+                }
+                else
+                {
+                    ViewData["Effect"] = notRetracted;
+                    ViewData["Reason"] = doesntExist;
+                }
+
+
+                return View("RightsChangingEffect");
+            }
+
+            return View("Rights");
         }
 
         private bool UserExists(string id)
