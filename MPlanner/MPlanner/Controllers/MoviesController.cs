@@ -167,7 +167,7 @@ namespace MPlanner.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Find([Bind("Genre,MinTime,MaxTime,Director")] SearchData searchData)
+        public async Task<IActionResult> Find([Bind("Genre,MinTime,MaxTime,Director")] SearchDataModel searchData)
         {
             var user = GetCurrentUserAsync().Result;
             List<Movie> movies = await _context.Movie.Where(x => x.UserId == user.Id
@@ -192,7 +192,7 @@ namespace MPlanner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Export([Bind("MondayStartTime,MondayEndTime,TuesdayStartTime,TuesdayEndTime," +
             "WednesdayStartTime,WednesdayEndTime,ThursdayStartTime,ThursdayEndTime,FridayStartTime,FridayEndTime," +
-            "SaturdayStartTime,SaturdayEndTime,SundayStartTime,SundayEndTime")] ExportData exportData)
+            "SaturdayStartTime,SaturdayEndTime,SundayStartTime,SundayEndTime")] ExportDataModel exportData)
         {
             var user = GetCurrentUserAsync().Result;
             List<Movie> movies = await _context.Movie.Where(x => x.UserId == user.Id)

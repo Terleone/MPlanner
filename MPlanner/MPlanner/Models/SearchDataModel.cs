@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace MPlanner.Models
 {
     [NotMapped]
-    public class SearchData
+    public class SearchDataModel
     {
         public int MovieId { get; set; }
         public string Title { get; set; }

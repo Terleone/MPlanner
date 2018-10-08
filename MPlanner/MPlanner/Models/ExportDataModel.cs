@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace MPlanner.Models
 {
     [NotMapped]
-    public class ExportData
+    public class ExportDataModel
     {
         [DisplayName("Monday start time")]
         [DataType(DataType.Time)]

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace MPlanner.Models
 {
+    [NotMapped]
     public class RightsGrantingModel
     {
-        [NotMapped]
         [Required]
         public string Email { get; set; }
     }
