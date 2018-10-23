@@ -107,12 +107,17 @@ namespace MPlanner.Controllers
                 var user = _userManager.FindByEmailAsync(viewModel.Email).Result;
                 var currentUser = GetCurrentUserAsync();
 
-                if (user.Id == currentUser.Result.Id)
+                if (user == null)
+                {
+                    ViewData["Effect"] = notGranted;
+                    ViewData["Reason"] = doesntExist;
+                }
+                else if (user.Id == currentUser.Result.Id)
                 {
                     ViewData["Effect"] = notGranted;
                     ViewData["Reason"] = cantYourself;
                 }
-                else if (user != null)
+                else
                 {
                     if (await _userManager.IsInRoleAsync(user, "Admin"))
                     {
@@ -126,11 +131,6 @@ namespace MPlanner.Controllers
 
                         ViewData["Effect"] = granted;
                     }
-                }
-                else
-                {
-                    ViewData["Effect"] = notGranted;
-                    ViewData["Reason"] = doesntExist;
                 }
 
                 return View("RightsChangingEffect");
@@ -154,7 +154,12 @@ namespace MPlanner.Controllers
                 var user = _userManager.FindByEmailAsync(viewModel.Email).Result;
                 var currentUser = GetCurrentUserAsync();
 
-                if (user.Id == currentUser.Result.Id)
+                if (user == null)
+                {
+                    ViewData["Effect"] = notRetracted;
+                    ViewData["Reason"] = doesntExist;
+                }
+                else if (user.Id == currentUser.Result.Id)
                 {
                     ViewData["Effect"] = notRetracted;
                     ViewData["Reason"] = cantYourself;
@@ -174,12 +179,6 @@ namespace MPlanner.Controllers
                         ViewData["Reason"] = notAnAdmin;
                     }
                 }
-                else
-                {
-                    ViewData["Effect"] = notRetracted;
-                    ViewData["Reason"] = doesntExist;
-                }
-
 
                 return View("RightsChangingEffect");
             }
