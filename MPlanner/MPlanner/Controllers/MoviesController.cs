@@ -98,6 +98,8 @@ namespace MPlanner.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("MovieId,Title,Genre,Time,Director,Year,Actors,Description")] Movie movie)
         {
+            var currentUser = GetCurrentUserAsync();
+
             if (id != movie.MovieId)
             {
                 return NotFound();
@@ -105,6 +107,7 @@ namespace MPlanner.Controllers
 
             if (ModelState.IsValid)
             {
+                movie.UserId = currentUser.Result.Id; 
                 try
                 {
                     _context.Update(movie);
