@@ -64,7 +64,15 @@ namespace MPlanner.Controllers
                 await _userManager.RemoveFromRoleAsync(user, "Admin");
             _context.Movie.RemoveRange(_context.Movie.Where(x => x.UserId == user.Id));
             _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return View("UserRemovalFailed");
+            }
             return RedirectToAction(nameof(Index));
         }
 

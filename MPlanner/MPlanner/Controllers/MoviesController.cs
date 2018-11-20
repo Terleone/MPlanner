@@ -216,32 +216,35 @@ namespace MPlanner.Controllers
             movies = movies.Except(notMappedMovies).ToList();
 
             Calendar calendar = new Calendar();
-            int index = 0;
-            Movie movie = movies[index];
-            for (DateTime iterator = DateTime.Now.AddDays(1); index < movies.Count; iterator = iterator.AddDays(1))
+            if (movies.Count != 0)
             {
-                var (availableStart, availableEnd, availableAmount) = availability[iterator.DayOfWeek];
-                while (availableAmount >= movie.Time.Value)
+                int index = 0;
+                Movie movie = movies[index];
+                for (DateTime iterator = DateTime.Now.AddDays(1); index < movies.Count; iterator = iterator.AddDays(1))
                 {
-                    DateTime startTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, availableStart.Value.Hour,
-                        availableStart.Value.Minute, 0);
-                    DateTime endTime = startTime.AddMinutes(movie.Time.Value);
-                    availableAmount -= movie.Time.Value;
-                    availableStart = endTime;
-
-                    CalendarEvent calEvent = new CalendarEvent
+                    var (availableStart, availableEnd, availableAmount) = availability[iterator.DayOfWeek];
+                    while (availableAmount >= movie.Time.Value)
                     {
-                        Start = new CalDateTime(startTime),
-                        End = new CalDateTime(endTime),
-                        Description = "Seance generated with MPlanner",
-                        Summary = movie.Title
-                    };
+                        DateTime startTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, availableStart.Value.Hour,
+                            availableStart.Value.Minute, 0);
+                        DateTime endTime = startTime.AddMinutes(movie.Time.Value);
+                        availableAmount -= movie.Time.Value;
+                        availableStart = endTime;
 
-                    calendar.Events.Add(calEvent);
-                    index++;
-                    if (index >= movies.Count)
-                        break;
-                    movie = movies[index];
+                        CalendarEvent calEvent = new CalendarEvent
+                        {
+                            Start = new CalDateTime(startTime),
+                            End = new CalDateTime(endTime),
+                            Description = "Seance generated with MPlanner",
+                            Summary = movie.Title
+                        };
+
+                        calendar.Events.Add(calEvent);
+                        index++;
+                        if (index >= movies.Count)
+                            break;
+                        movie = movies[index];
+                    }
                 }
             }
 
