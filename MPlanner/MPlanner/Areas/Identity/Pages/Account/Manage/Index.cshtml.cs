@@ -149,6 +149,8 @@ namespace MPlanner.Areas.Identity.Pages.Account.Manage
             await _emailSender.SendEmailAsync(
                 email,
                 "Confirm your email",
+                "By confirming your e-mail address you agree for processing of your e-mail address by MPlanner.\n" +
+                "MPlanner will use your e-mail address only to verify you as it's user.\n" +
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
         }
     }
