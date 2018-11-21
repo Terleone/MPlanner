@@ -8,6 +8,6 @@ namespace MPlanner.Services
 {
     public interface IEventAlgorithm
     {
-        string Execute(List<Movie> movies, Dictionary<DayOfWeek, (DateTime? startTime, DateTime? endTime, int amount)> availability);
+         string Execute(List<Movie> movies, Dictionary<DayOfWeek, (DateTime? startTime, DateTime? endTime, int amount)> availability, DateTime begin);
     }
 }

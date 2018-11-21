@@ -216,7 +216,7 @@ namespace MPlanner.Controllers
                 { DayOfWeek.Sunday, (exportData.SundayStartTime, exportData.SundayEndTime, exportData.SundayAmount) }
             };
 
-            return File(System.Text.Encoding.ASCII.GetBytes(_eventAlgorithm.Execute(movies, availability)), "application/octet-stream", "mplan.ical");
+            return File(System.Text.Encoding.ASCII.GetBytes(_eventAlgorithm.Execute(movies, availability, DateTime.Now.AddDays(1))), "application/octet-stream", "mplan.ical");
         }
 
         // GET: Movies/MoveUp/5
