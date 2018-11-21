@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MPlanner.Data;
 using MPlanner.Models;
+using MPlanner.Services;
 
 namespace MPlanner.Controllers
 {
@@ -23,10 +24,13 @@ namespace MPlanner.Controllers
 
         private readonly UserManager<IdentityUser> _userManager;
 
-        public MoviesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+        private readonly IEventAlgorithm _eventAlgorithm;
+
+        public MoviesController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IEventAlgorithm eventAlgorithm)
         {
             _context = context;
             _userManager = userManager;
+            _eventAlgorithm = eventAlgorithm;
         }
 
         // GET: Movies
@@ -212,45 +216,7 @@ namespace MPlanner.Controllers
                 { DayOfWeek.Sunday, (exportData.SundayStartTime, exportData.SundayEndTime, exportData.SundayAmount) }
             };
 
-            List<Movie> notMappedMovies = movies.Where(m => !availability.Any(day => day.Value.amount >= m.Time)).ToList();
-            movies = movies.Except(notMappedMovies).ToList();
-
-            Calendar calendar = new Calendar();
-            if (movies.Count != 0)
-            {
-                int index = 0;
-                Movie movie = movies[index];
-                for (DateTime iterator = DateTime.Now.AddDays(1); index < movies.Count; iterator = iterator.AddDays(1))
-                {
-                    var (availableStart, availableEnd, availableAmount) = availability[iterator.DayOfWeek];
-                    while (availableAmount >= movie.Time.Value)
-                    {
-                        DateTime startTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, availableStart.Value.Hour,
-                            availableStart.Value.Minute, 0);
-                        DateTime endTime = startTime.AddMinutes(movie.Time.Value);
-                        availableAmount -= movie.Time.Value;
-                        availableStart = endTime;
-
-                        CalendarEvent calEvent = new CalendarEvent
-                        {
-                            Start = new CalDateTime(startTime),
-                            End = new CalDateTime(endTime),
-                            Description = "Seance generated with MPlanner",
-                            Summary = movie.Title
-                        };
-
-                        calendar.Events.Add(calEvent);
-                        index++;
-                        if (index >= movies.Count)
-                            break;
-                        movie = movies[index];
-                    }
-                }
-            }
-
-            var serializer = new CalendarSerializer();
-            var serializedCalendar = serializer.SerializeToString(calendar);
-            return File(System.Text.Encoding.ASCII.GetBytes(serializedCalendar), "application/octet-stream", "mplan.ical");
+            return File(System.Text.Encoding.ASCII.GetBytes(_eventAlgorithm.Execute(movies, availability)), "application/octet-stream", "mplan.ical");
         }
 
         // GET: Movies/MoveUp/5

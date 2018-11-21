@@ -52,6 +52,7 @@ namespace MPlanner
 
             services.AddSingleton<IEmailSender, EmailSender>();
             services.Configure<AuthMessageSenderOptions>(options => Configuration.GetSection("AuthMessageSenderOptions").Bind(options));
+            services.AddScoped<IEventAlgorithm, EventAlgorithm>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
