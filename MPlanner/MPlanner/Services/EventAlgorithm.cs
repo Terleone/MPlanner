@@ -12,9 +12,13 @@ namespace MPlanner.Services
 {
     public class EventAlgorithm : IEventAlgorithm
     {
-        public string Execute(List<Movie> movies, Dictionary<DayOfWeek, (DateTime? startTime, DateTime? endTime, int amount)> availability, DateTime begin)
+        public string Execute(List<Movie> movies,
+            Dictionary<DayOfWeek,
+                (DateTime? startTime, DateTime? endTime, int amount)> availability,
+            DateTime begin)
         {
-            List<Movie> notMappedMovies = movies.Where(m => !availability.Any(day => day.Value.amount >= m.Time)).ToList();
+            List<Movie> notMappedMovies = movies
+                .Where(m => !availability.Any(day => day.Value.amount >= m.Time)).ToList();
             movies = movies.Except(notMappedMovies).ToList();
 
             Calendar calendar = new Calendar();
@@ -22,9 +26,11 @@ namespace MPlanner.Services
             {
                 int index = 0;
                 Movie movie = movies[index];
-                for (DateTime iterator = begin; index < movies.Count; iterator = iterator.AddDays(1))
+                for (DateTime iterator = begin; index < movies.Count; iterator =
+                    iterator.AddDays(1))
                 {
-                    var (availableStart, availableEnd, availableAmount) = availability[iterator.DayOfWeek];
+                    var (availableStart, availableEnd, availableAmount) =
+                        availability[iterator.DayOfWeek];
                     while (availableAmount >= movie.Time.Value)
                     {
                         DateTime startTime = new DateTime(iterator.Year, iterator.Month, iterator.Day, availableStart.Value.Hour,
